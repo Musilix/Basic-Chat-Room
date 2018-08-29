@@ -1,0 +1,290 @@
+<!doctype html>
+<html>
+
+<head>
+<meta charset="utf-8">
+<title>Socket Testing</title>
+<!-- fonts needed -->
+<link href="https://fonts.googleapis.com/css?family=Abel|Uncial+Antiqua" rel="stylesheet">
+<!-- node.js script needed?? or express/socket.io external script-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<!-- necessary for socket.io to work?!?!??!?! -->
+<script src="/socket.io/socket.io.js"></script>
+
+</head>
+
+<style>
+html,body{
+	margin:0;
+	padding:0px;
+
+	min-width: 700px;
+
+	background-color:#0a3d62;
+	
+/*	background: url(coolbg.png) no-repeat center fixed;
+	background-size: cover;*/
+
+/*	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: center;*/
+
+}
+
+
+::-webkit-scrollbar{
+	width:10px;
+}
+
+::-webkit-scrollbar-track{
+	background-color: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #888; 
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #555; 
+}
+
+#entire-container{
+	padding:0;
+	margin:0;
+
+	min-width: 700px;
+	text-align: center;
+}
+#title-holder{
+	text-align: center;
+}
+h2{
+	line-height: 1px;
+	font-family: 'Abel';
+	font-size:40px;
+	color: white;
+
+	/*border: 2px solid black;*/
+}
+#message-holder{
+	box-shadow: 0px 7px rgb(60, 99, 130);
+
+	font-family: 'Abel';
+	margin:0 auto;
+	padding: 50px 0px;
+	border-radius: 15px;
+	width: 60%;
+	height: 25vw;
+	background-color: #0be881;
+
+	overflow: auto;
+}
+form{
+	padding:50px;
+	margin:0 auto;
+	width:590px;
+}
+ul{
+
+	text-align: left;
+
+	list-style: none;
+	text-overflow: clip;
+
+	font-size: 20px;
+}
+li:nth-child(odd){
+	background-color: rgb(220,220,220);
+
+	z-index: 5;
+
+}
+
+li:nth-child(odd)::after{
+
+	z-index: -1;
+
+	background-color: rgb(220,220,220);
+
+	content: ' ';
+  	
+  	position: absolute;
+  	
+  	width: 20px;
+  	height: 20px;
+
+  	left: 10px;
+  	top: 20px;
+  	
+  	/*border-right: 1px solid red;*/
+  	/*border-bottom: 1.4px solid red;*/
+  	
+  	-webkit-transform: skew(0, 45deg);
+  	-moz-transform: skew(0, 45deg);
+  	transform: skew(0, -45deg);
+}
+
+li{
+	z-index: 5;
+
+	position: relative;
+
+	/*box-shadow: 0px 3px rgb(30, 55, 153);*/
+	background-color: white;
+
+	width: 65%;
+	/*height: 50px;*/
+
+	word-break:break-all;
+
+	margin:0 auto;
+	margin-top:20px;
+
+	padding:5px 5px;
+
+	border-radius: 10px;
+	/*border-width: 10px 10px 0px 0px;*/
+}
+
+li::after{
+	z-index: -1;
+
+	content: ' ';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  right: 10px;
+  top: 20px;
+  background: white;
+  /*border-right: 1px solid red;*/
+  /*border-bottom: 1.4px solid red;*/
+  -webkit-transform: skew(0, 45deg);
+  -moz-transform: skew(0, 45deg);
+  transform: skew(0, 45deg);
+}
+
+#real-messages{
+
+}
+#message-raw{
+	font-family: 'Abel';
+	font-size:30px;
+
+	padding:0px;
+	margin:0px;
+	width: 500px;
+	height:50px;
+	border: none;
+}
+#message-button{
+	text-align: center;
+
+	font-family: 'Abel';
+	font-size:30px;
+
+	padding:0px;
+	margin:0px;
+	width:80px;
+	height:50px;
+	border: none;
+}
+
+#user-count-hold{
+	position:fixed;
+
+	left:10px;
+	bottom:20px;
+
+	font-size: 40px;
+	font-family: 'Abel';
+	color: white;
+}
+</style>
+
+<body>
+	<audio id="message-sound" src="./sounds/sms.mp3"></audio>
+	<div id="user-count-hold">ppp</div>
+	<div id="entire-container">
+		<div id="title-holder">
+			<h2>CHiT CHaT</h2>
+		</div>
+		<div id="message-holder">
+			<ul id="real-messages"><li>testing</li></ul>
+		</div>
+		<div id="message-info-submission">
+			<form id="message-info" action="./index.html">
+				<input id="message-raw" value="" type="text" placeholder="Enter a Message!" autocomplete="off"/>
+				<button id="message-button" name="send-message" type="button">SEND</button> 
+			</form>
+		</div>
+	</div>
+</body>
+
+<script>
+	$(document).ready(function () {
+		//apparently, this socket var is global... and it holds the io() obj we need to communicate with the sockets on the 
+		//server,,, i think... idk, the placement of all these shits gets confusing really
+
+		var socket = io();
+		//ok let me try and break this down... so, this first part... the function part... i dont quite understand it and i think it may just be for syntactic sugar/?? but it may have a real real purpose
+		$(function(){
+			//we make our socket obj... aka a input output object
+			// var socket = io();
+			//we say when our send button is clicked, we will run the following code
+			$("#message-button").click(function(){
+				//our io obj should emit a custom event(message-get) to the server, with a paramaeter including the val of the input field
+				socket.emit('message-get', $("#message-raw").val());
+				//we clear our input field afterwards for new messages
+				$("#message-raw").val('');
+				//I have no idea what the purpose of this is; to break maybe????
+				return false;
+			});
+
+			//this line is the socket waiting to recieve a response back from the server... we emitted the data to the server, now it should relay it to everyone else on the server
+			//this line waits for a new message get, and then appends whatever the txt content of msg is to a new li in our ul.s
+			socket.on('message-get', function(msg){
+				// NEED TO MAKE SOUND WHEN MESSAGE COMES UP
+				$("#message-sound")[0].play();
+				$('#real-messages').append($('<li>').text("SENDER:\n" + msg));
+			});
+
+			socket.on('update-users', function(){
+				checkUsers();
+			});
+		});
+
+		function checkUsers(){
+			socket.emit('get-users');
+			socket.on('get-users', function(data){
+				var text;
+				if(data === 1){
+					text = ' user on server';
+				}else{
+					text = ' users on server';
+				}
+				$("#user-count-hold").text((data + text));
+			});
+		}
+		
+
+		var minWidth = 800 * .6;
+
+		$("#message-holder").css({
+			"minWidth": minWidth + "px"
+		});
+
+		// THIS SHIT DONT WORK... WHEN WE PRESS ENTER, IT TRIES TO NAVIGATE TO BLANK PAAGE
+		$("#message-raw").keyup(function(event){
+			event.preventDefault();
+			if(event.keyCode === 13){
+				$("#message-button").click();
+			}
+		});
+
+
+
+	});
+</script>
+
+</html>

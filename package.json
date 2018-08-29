@@ -1,0 +1,9 @@
+{
+	"name": "individualistic-socket-shits",
+	"version": "0.0.1",
+	"description": "Just trying my own implementation on socket communication!",
+	"dependencies": {
+		"express": "^4.16.3",
+		"socket.io": "^2.1.1"
+	}
+}
