@@ -2,7 +2,7 @@ var userCount = 0;
 
 // must declare dependencies for express to ultimately enable smooth/easy/clean manner to implement some html
 //into our node.js shits
-var express = require('express');
+const express = require('express');
 // need to also require http as we will be working with server shit. Opening up server on port 5000, and sending requests and getting responses
 var http = require('http');
 //we create an app instance by making an express obj(this is how we use all the tools necessary tp build html stuff)
@@ -15,10 +15,12 @@ var socketIo = require('socket.io');
 var server = http.Server(app);
 var io = socketIo(server);
 
+const PORT = process.env.PORT || 5000;
+
 app.use(express.static(__dirname + '/public'));
 
 //here we set the port our bebsite will bbe on
-app.set('port', 5000);
+app.set('port', PORT);
 
 // bucc nasty wa of locating our file. we cant use ./ as that is relative to our current working dir
 //instead we use __dirname to find the dir which the currently executed .js file is!
@@ -63,8 +65,8 @@ io.on('connection', function(socket){
 });
 
 //here our server obj is listening on our port 5000, rather than an http obj listening!
-server.listen(5000, function(){
-	console.log("LISTENING ON 5000");
+server.listen(PORT, function(){
+	console.log("LISTENING ON " + PORT);
 });
 
 
