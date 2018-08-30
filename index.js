@@ -17,7 +17,14 @@ var io = socketIo(server);
 
 const PORT = process.env.PORT || 5000;
 
-app.use(express.static(__dirname + '/public'));
+// app.use(express.static(__dirname + '/public'));
+
+//so we call our app obj/express middlware shits in order to declare a static file we will use on our hosted site
+//we say to include images from our avatars folder for every http request including ./avatars
+
+//app.use() is mountaing the express.static middleware!!!!!
+app.use('/avatars', express.static(__dirname + '/avatars'));
+app.use('/sounds', express.static(__dirname + '/sounds'));
 
 //here we set the port our bebsite will bbe on
 app.set('port', PORT);

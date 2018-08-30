@@ -94,14 +94,14 @@ ul{
 
 	font-size: 20px;
 }
-li:nth-child(odd){
+#message-holder li:nth-child(odd){
 	background-color: rgb(220,220,220);
 
 	z-index: 5;
 
 }
 
-li:nth-child(odd)::after{
+#message-holder li:nth-child(odd)::after{
 
 	z-index: -1;
 
@@ -125,7 +125,7 @@ li:nth-child(odd)::after{
   	transform: skew(0, -45deg);
 }
 
-li{
+#message-holder li{
 	z-index: 5;
 
 	position: relative;
@@ -147,7 +147,7 @@ li{
 	/*border-width: 10px 10px 0px 0px;*/
 }
 
-li::after{
+#message-holder li::after{
 	z-index: -1;
 
 	content: ' ';
@@ -200,22 +200,181 @@ li::after{
 	font-family: 'Abel';
 	color: white;
 }
+
+#prompts{
+	width:400px;
+	height:400px;
+
+	background-color:#353b48;
+
+	position: fixed;
+
+	border-radius: 15px;
+
+	opacity: 0;
+
+	z-index: 20;
+
+	text-align: center;
+
+	font-family: 'Abel';
+
+}
+
+#username{
+	text-align: center;;
+
+	font-size:23px;
+	line-height: 1px;
+
+	border-radius: 1px;
+	height: 35px;
+	/*width:25px;*/
+	border: none;
+
+	padding-left: 10px;
+	margin:25px;
+
+	opacity:.5;
+
+}
+
+#username:hover{
+	opacity:1;
+}
+
+#prompts-bg{
+	position: fixed;
+	z-index: 19;
+
+	background:linear-gradient(124deg, #ff2400, #e81d1d, #e8b71d, #e3e81d, #1de840, #1ddde8, #2b1de8, #dd00f3, #dd00f3);
+
+	opacity: 0;
+
+	width:100%;
+	height: 100%;
+
+	left:0;
+	top:0;
+
+}
+
+#prompts p{
+	margin-top: 0px;
+
+	font-size: 20px;
+}
+
+#photo-list{
+	padding: 0;
+	margin: 30px 0px;
+	text-align: center;
+}
+
+.profile-pic{
+	width:50px;
+	height:50px;
+
+	/*transition: opacity .5s ease-out;*/
+}
+
+#photo-list li:hover{
+	cursor: pointer;
+	
+	opacity:1;
+}
+
+#photo-list li{
+	opacity: .4;
+
+	list-style: none;
+	display: inline-block;
+
+	transition: opacity .5s ease-out;
+
+}
+
+#confirmation{
+	position: relative;
+
+	bottom:0;
+
+	border: none;
+	font-family: "Abel";
+	font-size: 35px;
+
+	width:400px;
+	height:70px;
+
+	border-radius: 0px 0px 15px 15px;
+
+	background-color: #7f8fa6;
+
+	transition: background-color .5s ease-out;
+}
+
+#confirmation:hover{
+	cursor: pointer;
+
+	background-color: #fbc531;
+
+}
+
+#activate{
+	width:400px;
+	height: 400px;
+
+	padding:0;
+	margin:0;
+}
+
+#midd{
+	color:rgb(255,0,0);
+}
+
+#midd2{
+	color:rgb(0,255,0);
+}
+
+
 </style>
 
 <body>
-	<audio id="message-sound" src="./sounds/sms.mp3"></audio>
-	<div id="user-count-hold">ppp</div>
+	<div id="prompts-bg"></div>
+	<div id="prompts">
+		<h2><u>Give Us Some Info!</u></h2>
+
+		<form id="activate" action="search" method="post">
+			<input id="username" type="search"  autocomplete="off" placeholder="give me a name">
+			<p><b>Whats Your Favorite Picture</b></p>
+			<ul id="photo-list">
+				<li id="img-1"><img class = "profile-pic" src="http://localhost:5000/avatars/avatar-01.png"></li>
+				<li id="img-2"><img class = "profile-pic" src="http://localhost:5000/avatars/avatar-03.png"></li>
+				<li id="img-3"><img class = "profile-pic" src="http://localhost:5000/avatars/avatar-04.png"></li>
+				<br>
+				<li id="img-4"><img class = "profile-pic" src="http://localhost:5000/avatars/avatar-06.png"></li>
+				<li id="img-5"><img class = "profile-pic" src="http://localhost:5000/avatars/avatar-02.png"></li>
+				<li id="img-6"><img class = "profile-pic" src="http://localhost:5000/avatars/avatar-05.png"></li>
+			</ul>
+
+			<input type="submit" id="confirmation" value = "READY">
+		</form>
+	</div>
+
+
+	<audio id="message-sound" src="./sounds/horn.wav"></audio>
+	<div id="user-count-hold">...</div>
 	<div id="entire-container">
 		<div id="title-holder">
-			<h2>CHiT CHaT</h2>
+			<h2>CH<span id="midd">i</span>TCH<span id="midd2">a</span>T</h2>
 		</div>
 		<div id="message-holder">
 			<ul id="real-messages"><li>testing</li></ul>
 		</div>
 		<div id="message-info-submission">
 			<form id="message-info" action="./index.html">
-				<input id="message-raw" value="" type="text" placeholder="Enter a Message!" autocomplete="off"/>
-				<button id="message-button" name="send-message" type="button">SEND</button> 
+				<input id="message-raw" type="search" placeholder="Enter a Message!" autocomplete="off"/>
+				<input id="message-button" name="send-message" type="submit">SEND</button> 
 			</form>
 		</div>
 	</div>
@@ -223,8 +382,11 @@ li::after{
 
 <script>
 	$(document).ready(function () {
+
 		//apparently, this socket var is global... and it holds the io() obj we need to communicate with the sockets on the 
 		//server,,, i think... idk, the placement of all these shits gets confusing really
+
+/////////////////////////////////////////////////////////////////////
 
 		var socket = io();
 		//ok let me try and break this down... so, this first part... the function part... i dont quite understand it and i think it may just be for syntactic sugar/?? but it may have a real real purpose
@@ -232,7 +394,7 @@ li::after{
 			//we make our socket obj... aka a input output object
 			// var socket = io();
 			//we say when our send button is clicked, we will run the following code
-			$("#message-button").click(function(){
+			$("#message-info").submit(function(){
 				//our io obj should emit a custom event(message-get) to the server, with a paramaeter including the val of the input field
 				socket.emit('message-get', $("#message-raw").val());
 				//we clear our input field afterwards for new messages
@@ -246,6 +408,7 @@ li::after{
 			socket.on('message-get', function(msg){
 				// NEED TO MAKE SOUND WHEN MESSAGE COMES UP
 				$("#message-sound")[0].play();
+
 				$('#real-messages').append($('<li>').text("SENDER:\n" + msg));
 			});
 
@@ -253,6 +416,8 @@ li::after{
 				checkUsers();
 			});
 		});
+
+/////////////////////////////////////////////////////////////////////
 
 		function checkUsers(){
 			socket.emit('get-users');
@@ -267,6 +432,7 @@ li::after{
 			});
 		}
 		
+/////////////////////////////////////////////////////////////////////
 
 		var minWidth = 800 * .6;
 
@@ -274,13 +440,61 @@ li::after{
 			"minWidth": minWidth + "px"
 		});
 
-		// THIS SHIT DONT WORK... WHEN WE PRESS ENTER, IT TRIES TO NAVIGATE TO BLANK PAAGE
-		$("#message-raw").keyup(function(event){
-			event.preventDefault();
-			if(event.keyCode === 13){
-				$("#message-button").click();
+/////////////////////////////////////////////////////////////////////
+		var imageSelected = false;
+		var prevImgSel;
+		$("#img-1, #img-2, #img-3, #img-4, #img-5, #img-6").click(function(){
+			if(imageSelected === true){
+				prevImgSel.css({
+					"opacity": ".4"
+				});
 			}
+
+			$(this).css({
+				"opacity": "1"
+			});
+			
+			imageSelected = true;
+			prevImgSel = $(this);
 		});
+
+
+		$("#activate").submit(function(){
+			console.log($("#username").val());
+
+			$("#username").val("");
+
+			return false;
+		});
+
+		// $("#confirmation").click(function(){
+		// 	var userName = $("#username").val();
+		// 	var chosenPic = 0;
+
+		// 	$("#username").val("");
+
+		// 	console.log(userName);
+		// });
+
+
+/////////////////////////////////////////////////////////////////////
+
+		$("#prompts").css({
+			"left": ($(window).width() - $("#prompts").width()) / 2,
+			"top": ($(window).height() - $("#prompts").height()) / 2
+		}).animate({opacity: "1"}, 1500);
+
+		$("#prompts-bg").animate({opacity: ".85"});
+
+/////////////////////////////////////////////////////////////////////
+
+		$(window).resize(function(){
+			$("#prompts").css({
+				"left": ($(window).width() - $("#prompts").width()) / 2,
+				"top": ($(window).height() - $("#prompts").height()) / 2
+			});
+		});
+/////////////////////////////////////////////////////////////////////
 
 
 
