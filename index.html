@@ -126,6 +126,9 @@ ul{
 }
 
 #message-holder li{
+
+	white-space: pre-wrap;
+
 	z-index: 5;
 
 	position: relative;
@@ -281,7 +284,7 @@ ul{
 #photo-list li:hover{
 	cursor: pointer;
 	
-	opacity:1;
+	opacity:1 !important;
 }
 
 #photo-list li{
@@ -335,7 +338,6 @@ ul{
 #midd2{
 	color:rgb(0,255,0);
 }
-
 
 </style>
 
@@ -409,7 +411,7 @@ ul{
 				// NEED TO MAKE SOUND WHEN MESSAGE COMES UP
 				$("#message-sound")[0].play();
 
-				$('#real-messages').append($('<li>').text("SENDER:\n" + msg));
+				$('#real-messages').append($('<li>').text(userChosenName + ":\n" + msg));
 			});
 
 			socket.on('update-users', function(){
@@ -456,13 +458,47 @@ ul{
 			
 			imageSelected = true;
 			prevImgSel = $(this);
+
+			storeImgChoice(prevImgSel);
+			// console.log(prevImgSel);
 		});
 
+		function storeImgChoice(img){
+			var imgChoice = img;
+			//for some reason, i must store the img in prevImgSel here... uhhh why???
+			prevImgSel = imgChoice;
+			// console.log(imgChoice);
+		}
 
+		var userChosenPic;
+		var userChosenName;
 		$("#activate").submit(function(){
-			console.log($("#username").val());
+			if(prevImgSel[0].id === "img-1"){
+				userChosenPic = 1;
+			}else if(prevImgSel[0].id === "img-2"){
+				userChosenPic = 2;
+			}else if(prevImgSel[0].id === "img-3"){
+				userChosenPic = 3;
+			}else if(prevImgSel[0].id === "img-4"){
+				userChosenPic = 4;
+			}else if(prevImgSel[0].id === "img-5"){
+				userChosenPic = 5;
+			}else if(prevImgSel[0].id === "img-6"){
+				userChosenPic = 6;
+			}
+
+			userChosenName = $("#username").val();
+
+			
+			$("#prompts, #prompts-bg").animate({
+				opacity: "0",
+				zIndex: -999
+			});
 
 			$("#username").val("");
+
+			console.log(userChosenName);
+			console.log(userChosenPic);
 
 			return false;
 		});
@@ -482,7 +518,7 @@ ul{
 		$("#prompts").css({
 			"left": ($(window).width() - $("#prompts").width()) / 2,
 			"top": ($(window).height() - $("#prompts").height()) / 2
-		}).animate({opacity: "1"}, 2500);
+		}).animate({opacity: "1"}, 3500);
 
 		$("#prompts-bg").animate({opacity: ".85"}, 1500);
 
