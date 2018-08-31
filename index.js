@@ -45,12 +45,11 @@ app.get('/', function(req, res){
 });
 
 //this checks to see when our io has registered as connected! then we can go on...
+//
+//we say a user has entered if a new io socket is connected
 io.on('connection', function(socket){
 	userCount++;
-
 	io.emit('update-users');
-
-	//we say a user has entered if a new io socket is connected
 	console.log("USER ENTERED");
 
 	//on disconnect, we say the user has, ofc, disconnected
@@ -62,10 +61,21 @@ io.on('connection', function(socket){
 
 	//and once a socket/user sends the server a message get event, we use our function to emit A TRUE MESSAGE GET TO EVERY USER ON THE SERVER
 	//giving it a parameter with our msg data
+
+	//holy fuck, for so long this shit was returning msg.namer back as undefined, then all of a sudden when I restarted the server, everything seemed to sync up???
+	//so maybe if i make changes that the server depend on, i have to reset the server? aka node index.js
 	socket.on('message-get', function(msg){
-		io.emit('message-get', msg);
+		//json obj to hold user details
+		var userDetails = {
+			message: msg.message,
+			pic: msg.pic,
+			namer: msg.namer
+		};
+		
+		io.emit('message-get', userDetails);
 	});
 
+	//recording the users on the server: only updates when someone "disconnects"
 	socket.on('get-users', function(){
 		io.emit('get-users', userCount);
 	});

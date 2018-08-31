@@ -151,20 +151,25 @@ ul{
 }
 
 #message-holder li::after{
-	z-index: -1;
+		z-index: 441;
 
-	content: ' ';
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  right: 10px;
-  top: 20px;
-  background: white;
-  /*border-right: 1px solid red;*/
-  /*border-bottom: 1.4px solid red;*/
-  -webkit-transform: skew(0, 45deg);
-  -moz-transform: skew(0, 45deg);
-  transform: skew(0, 45deg);
+		content: ' ';
+	 	position: absolute;
+
+	  	width: 20px;
+	  	height: 20px;
+
+	  	right: 10px;
+	  	top: 50px;
+
+	  	background: white;
+
+  		/*border-right: 1px solid red;*/
+  		/*border-bottom: 1.4px solid red;*/
+
+	  	-webkit-transform: skew(0, 45deg);
+	 	-moz-transform: skew(0, 45deg);
+	  	transform: skew(0, 45deg);
 }
 
 #real-messages{
@@ -339,6 +344,16 @@ ul{
 	color:rgb(0,255,0);
 }
 
+#intro{
+	font-family: "Abel";
+	font-size: 75px;
+
+	color:grey;
+
+	font-style: italic;
+
+}
+
 </style>
 
 <body>
@@ -371,12 +386,13 @@ ul{
 			<h2>CH<span id="midd">i</span>TCH<span id="midd2">a</span>T</h2>
 		</div>
 		<div id="message-holder">
-			<ul id="real-messages"><li>testing</li></ul>
+			<span id="intro">SAY SOMETHING!</span>
+			<ul id="real-messages"></ul>
 		</div>
 		<div id="message-info-submission">
 			<form id="message-info" action="./index.html">
 				<input id="message-raw" type="search" placeholder="Enter a Message!" autocomplete="off"/>
-				<input id="message-button" name="send-message" type="submit">SEND</button> 
+				<input id="message-button" name="send-message" type="submit" value="SEND">
 			</form>
 		</div>
 	</div>
@@ -398,7 +414,14 @@ ul{
 			//we say when our send button is clicked, we will run the following code
 			$("#message-info").submit(function(){
 				//our io obj should emit a custom event(message-get) to the server, with a paramaeter including the val of the input field
-				socket.emit('message-get', $("#message-raw").val());
+
+				var userDetails = {
+					message: $("#message-raw").val(),
+					pic: userChosenPic,
+					namer: userChosenName
+				};
+
+				socket.emit('message-get', userDetails);
 				//we clear our input field afterwards for new messages
 				$("#message-raw").val('');
 				//I have no idea what the purpose of this is; to break maybe????
@@ -408,12 +431,36 @@ ul{
 			//this line is the socket waiting to recieve a response back from the server... we emitted the data to the server, now it should relay it to everyone else on the server
 			//this line waits for a new message get, and then appends whatever the txt content of msg is to a new li in our ul.s
 			socket.on('message-get', function(msg){
-				// NEED TO MAKE SOUND WHEN MESSAGE COMES UP
-				$("#message-sound")[0].play();
+				var imgToAppend;
+				
+				//get rid of intro message:
+				$("#intro").css({display: "none"});
 
-				$('#real-messages').append($('<li>').text(userChosenName + ":\n" + msg));
+				// NEED TO MAKE SOUND WHEN MESSAGE COMES UP
+				//doesnt work still tho
+				// $("#message-sound")[0].play();
+
+				//checks what the pic ID is of the user; it can range from 1-6 depending on the pic they chose as an avatar
+				if(msg.pic === 1){
+					imgToAppend = '<span><img src="http://localhost:5000/avatars/avatar-01.png" width="25" height="25"/></span';
+				}else if(msg.pic === 2){
+					imgToAppend = '<img src="http://localhost:5000/avatars/avatar-02.png" width="25" height="25"/>';
+				}else if(msg.pic === 3){
+					imgToAppend = '<img src="http://localhost:5000/avatars/avatar-03.png" width="25" height="25"/>';
+				}else if(msg.pic === 4){
+					imgToAppend = '<img src="http://localhost:5000/avatars/avatar-04.png" width="25" height="25"/>';
+				}else if(msg.pic === 5){
+					imgToAppend = '<img src="http://localhost:5000/avatars/avatar-05.png" width="25" height="25"/>';
+				}else if(msg.pic === 6){
+					imgToAppend = '<img src="http://localhost:5000/avatars/avatar-06.png" width="25" height="25"/>';
+				}
+
+				//we gotta find a way to add the pic next to our li element
+				$('#real-messages').append($('<li id="actual-message">').text(msg.namer + ":\n" + msg.message));
+
 			});
 
+			//when our io() obj receives a update user message, well, we udpdate user count on server
 			socket.on('update-users', function(){
 				checkUsers();
 			});
@@ -423,6 +470,7 @@ ul{
 
 		function checkUsers(){
 			socket.emit('get-users');
+
 			socket.on('get-users', function(data){
 				var text;
 				if(data === 1){
@@ -436,6 +484,7 @@ ul{
 		
 /////////////////////////////////////////////////////////////////////
 
+		//sets width of our message holder
 		var minWidth = 800 * .6;
 
 		$("#message-holder").css({
@@ -443,6 +492,10 @@ ul{
 		});
 
 /////////////////////////////////////////////////////////////////////
+
+		//provides dynamic image selection thing...
+		//on hover, the avatar icons can light up. if clicked, they stay lit, if another is clicked, the currently clicekd one dims and the new one lights up
+		//all avatar icons can still light up on hover, as we set the !important tag on our opacity transition in CSS
 		var imageSelected = false;
 		var prevImgSel;
 		$("#img-1, #img-2, #img-3, #img-4, #img-5, #img-6").click(function(){
@@ -463,6 +516,10 @@ ul{
 			// console.log(prevImgSel);
 		});
 
+/////////////////////////////////////////////////////////////////////
+		
+		//the method that was evidently needed in order to store the img we selected in a var.
+		//this is different from the vals 1-6, as it is the actual name of the img ID
 		function storeImgChoice(img){
 			var imgChoice = img;
 			//for some reason, i must store the img in prevImgSel here... uhhh why???
@@ -470,6 +527,9 @@ ul{
 			// console.log(imgChoice);
 		}
 
+/////////////////////////////////////////////////////////////////////
+	
+		//uses the img ID obtained to assign a simpler value for determing which num avatar icon to use
 		var userChosenPic;
 		var userChosenName;
 		$("#activate").submit(function(){
@@ -489,6 +549,7 @@ ul{
 
 			userChosenName = $("#username").val();
 
+/////////////////////////////////////////////////////////////////////
 			
 			$("#prompts, #prompts-bg").animate({
 				opacity: "0",
@@ -497,8 +558,8 @@ ul{
 
 			$("#username").val("");
 
-			console.log(userChosenName);
-			console.log(userChosenPic);
+			// console.log(userChosenName);
+			// console.log(userChosenPic);
 
 			return false;
 		});
@@ -518,9 +579,9 @@ ul{
 		$("#prompts").css({
 			"left": ($(window).width() - $("#prompts").width()) / 2,
 			"top": ($(window).height() - $("#prompts").height()) / 2
-		}).animate({opacity: "1"}, 3500);
+		}).animate({opacity: "1"}, 1500);
 
-		$("#prompts-bg").animate({opacity: ".85"}, 1500);
+		$("#prompts-bg").animate({opacity: ".85"}, 600);
 
 /////////////////////////////////////////////////////////////////////
 
