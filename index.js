@@ -62,8 +62,8 @@ io.on('connection', function(socket){
 	//and once a socket/user sends the server a message get event, we use our function to emit A TRUE MESSAGE GET TO EVERY USER ON THE SERVER
 	//giving it a parameter with our msg data
 
-	//holy fuck, for so long this shit was returning msg.namer back as undefined, then all of a sudden when I restarted the server, everything seemed to sync up???
-	//so maybe if i make changes that the server depend on, i have to reset the server? aka node index.js
+	//holy frick, for so long this junk was returning msg.namer back as undefined, then all of a sudden when I restarted the server, everything seemed to sync up???
+	//so maybe if i make changes that the server depend on, i have to reset the server
 	socket.on('message-get', function(msg){
 		//json obj to hold user details
 		var userDetails = {
